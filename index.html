@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Steam OpenID Login</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.openid.net/libs/openid/0.11.0/openid.js"></script>
+</head>
+<body>
+    <form id="steamForm">
+        <input type="submit" value="Sign in with Steam" />
+    </form>
+
+    <script>
+        // Replace 'YOUR_STEAM_ID' with the Steam ID of the user you want to whitelist
+        var whitelistedSteamIDs = ['YOUR_STEAM_ID'];
+
+        // Get the Steam Form
+        var steamForm = document.getElementById('steamForm');
+
+        // Attach the Steam OpenID sign-in functionality
+        steamForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting
+            OpenID.Signin.redirect('https://steamcommunity.com/openid/'); // Redirect the user to the Steam OpenID page
+        });
+
+        // Function to extract the Steam ID from the URL fragment
+        function getSteamID() {
+            var fragment = window.location.hash.substring(1); // Remove the hash character
+            var params = fragment.split('&'); // Split the fragment into key-value pairs
+            for (var i = 0; i < params.length; i++) {
+                var pair = params[i].split('='); // Split each key-value pair
+                if (pair[0] === 'openid.identity') { // Check if the key is 'openid.identity'
+                    var steamID = pair[1].match(/\d+$/)[0]; // Extract the Steam ID from the value
+                    return steamID; // Return the Steam ID
+                }
+            }
+            return null; // Return null if the Steam ID is not found
+        }
+
+        // Call the function to get the Steam ID
+        var steamID = getSteamID();
+        if (steamID) {
+            // Check if the Steam ID is in the whitelisted ID list
+            if (whitelistedSteamIDs.includes(steamID)) {
+                // Display a text box and a button for additional user input
+                var textBox = document.createElement('input');
+                textBox.type = 'text';
+                textBox.placeholder = 'Enter your text here';
+                document.body.appendChild(textBox);
+
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.innerText = 'Submit';
+                button.onclick = function() {
+                    // Process the user's input
+                    console.log('User text:', textBox.value);
+                };
+                document.body.appendChild(button);
+            } else {
+                console.log('Steam ID not whitelisted:', steamID);
+            }
+        } else {
+            console.log('Failed to get Steam ID');
+        }
+    </script>
+</body>
+</html>
